@@ -467,6 +467,9 @@ createChart ();
 //********************************************
 //handle logic of LORA web button
 //********************************************
+var url = "https://integrations.thethingsnetwork.org/ttn-asia-se/api/v2/down/iotlora2/iotlora2?key=ttn-account-v2.kZf2Q5NRSC-YwzN2b0Hox9VPpq2wmWZFYsqvsWBA3kE";
+var deviceId = "f46701e6e2e0";
+
 
 var checkFan = () => {
   if ($('#fanText').text() == 'On')
@@ -482,7 +485,7 @@ var checkLight = () => {
 
 var dataFan = (status) => {
   return {
-    "dev_id": "b06b01e6e2e0",
+    "dev_id": deviceId,
     "port": 1,
     "confirmed": false,
     "payload_fields": {
@@ -494,7 +497,7 @@ var dataFan = (status) => {
 
 var dataLight = (status) => {
   return {
-    "dev_id": "b06b01e6e2e0",
+    "dev_id": deviceId,
     "port": 1,
     "confirmed": false,
     "payload_fields": {
@@ -504,35 +507,46 @@ var dataLight = (status) => {
   }
 }
 
-//var turnOnFan
+var turnOnFan = () => {
+  $('#fanText').text('On');
+  $("#fanBtn").removeClass('btn-danger').addClass('btn-primary');
+}
 
+var turnOffFan = () => {
+  $('#fanText').text('Off');
+  $("#fanBtn").removeClass('btn-primary').addClass('btn-danger');
+}
 
+var turnOnLight = () => {
+  $('#lightText').text('On');
+  $("#lightBtn").removeClass('btn-danger').addClass('btn-primary');
+}
+
+var turnOffLight = () => {
+  $('#lightText').text('Off');
+  $("#lightBtn").removeClass('btn-primary').addClass('btn-danger');
+}
 
 $("#fanBtn").bind( "click", () => {
   if($('#fanText').text() == 'On'){
-    $('#fanText').text('Off');
-    $("#fanBtn").removeClass('btn-primary').addClass('btn-danger');
+    turnOffFan();
     sendDownlink(dataFan(0));
   }else {
-    $('#fanText').text('On');
-    $("#fanBtn").removeClass('btn-danger').addClass('btn-primary');
+    turnOnFan();
     sendDownlink(dataFan(1));
   }
 });
 
 $( "#lightBtn" ).bind( "click", function() {
   if($('#lightText').text() == 'On'){
-    $('#lightText').text('Off');
-    $("#lightBtn").removeClass('btn-primary').addClass('btn-danger');
+    turnOffLight();
     sendDownlink(dataLight(0));
   }else {
-    $('#lightText').text('On');
-    $("#lightBtn").removeClass('btn-danger').addClass('btn-primary');
+    turnOnLight();
     sendDownlink(dataLight(1));
   }
 });
 
-var url = "https://integrations.thethingsnetwork.org/ttn-asia-se/api/v2/down/esp32iotlora/lora?key=ttn-account-v2.NVbk-rHNOrWv6VW-KNrH8u2r4ymoAk8RI1nCBByEQg4"
 var sendDownlink = (data) => {
   fetch(url, {
     method: "POST",
@@ -541,3 +555,31 @@ var sendDownlink = (data) => {
     console.log("Request complete! response:", res);
   });
 }
+
+var lora2 = document.getElementById('lora2');
+var dbref2 = firebase.database().ref().child('lora2');
+var showButtonStatus = (buttonData) => {
+  console.log(buttonData);
+  let statusFan = buttonData.payload_fields.fan;
+  let statusLight = buttonData.payload_fields.light;
+
+  if (statusFan != checkFan()) {
+    if (statusFan == 0) {
+      turnOffFan();
+    }
+    else {
+      turnOnFan();
+    }
+  }
+
+  if (statusLight != checkLight()) {
+    if (statusLight == 0) {
+      turnOffLight();
+    }
+    else {
+      turnOnLight();
+    }
+  }
+}
+
+dbref2.on('value', deviceObj => showButtonStatus(deviceObj.val()));
