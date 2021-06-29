@@ -510,21 +510,25 @@ var dataLight = (status) => {
 var turnOnFan = () => {
   $('#fanText').text('On');
   $("#fanBtn").removeClass('btn-danger').addClass('btn-primary');
+  localStorage.setItem("fan", "On");
 }
 
 var turnOffFan = () => {
   $('#fanText').text('Off');
   $("#fanBtn").removeClass('btn-primary').addClass('btn-danger');
+  localStorage.setItem("fan", "Off");
 }
 
 var turnOnLight = () => {
   $('#lightText').text('On');
   $("#lightBtn").removeClass('btn-danger').addClass('btn-primary');
+  localStorage.setItem("light", "On");
 }
 
 var turnOffLight = () => {
   $('#lightText').text('Off');
   $("#lightBtn").removeClass('btn-primary').addClass('btn-danger');
+  localStorage.setItem("light", "Off");
 }
 
 $("#fanBtn").bind( "click", () => {
@@ -556,30 +560,43 @@ var sendDownlink = (data) => {
   });
 }
 
-var lora2 = document.getElementById('lora2');
-var dbref2 = firebase.database().ref().child('lora2');
-var showButtonStatus = (buttonData) => {
-  console.log(buttonData);
-  let statusFan = buttonData.payload_fields.fan;
-  let statusLight = buttonData.payload_fields.light;
-
-  if (statusFan != checkFan()) {
-    if (statusFan == 0) {
-      turnOffFan();
-    }
-    else {
+var loadButton = () => {
+  if (typeof (Storage) !== "undefined") {
+    let fan = localStorage.getItem("fan");
+    let light = localStorage.getItem("light");
+    if (fan == "On") {
       turnOnFan();
     }
-  }
-
-  if (statusLight != checkLight()) {
-    if (statusLight == 0) {
-      turnOffLight();
-    }
-    else {
+    if (light == "On") {
       turnOnLight();
     }
   }
 }
+loadButton();
+// var lora2 = document.getElementById('lora2');
+// var dbref2 = firebase.database().ref().child('lora2');
+// var showButtonStatus = (buttonData) => {
+//   console.log(buttonData);
+//   let statusFan = buttonData.payload_fields.fan;
+//   let statusLight = buttonData.payload_fields.light;
 
-dbref2.on('value', deviceObj => showButtonStatus(deviceObj.val()));
+//   if (statusFan != checkFan()) {
+//     if (statusFan == 0) {
+//       turnOffFan();
+//     }
+//     else {
+//       turnOnFan();
+//     }
+//   }
+
+//   if (statusLight != checkLight()) {
+//     if (statusLight == 0) {
+//       turnOffLight();
+//     }
+//     else {
+//       turnOnLight();
+//     }
+//   }
+// }
+
+// dbref2.on('value', deviceObj => showButtonStatus(deviceObj.val()));
