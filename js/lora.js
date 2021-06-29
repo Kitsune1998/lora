@@ -483,15 +483,23 @@ var checkLight = () => {
   return 0;
 }
 
+var base64Handle = ( fanStatus, lightStatus) => {
+  console.log(fanStatus+" "+lightStatus);
+  if (fanStatus == 0 && lightStatus == 0)
+    return "AA==";
+  else if (fanStatus == 1 && lightStatus == 0)
+    return "AQ==";
+  else if (fanStatus == 0 && lightStatus == 1)
+    return "Ag==";
+  else return "Aw==";
+}
+
 var dataFan = (status) => {
   return {
     "dev_id": deviceId,
     "port": 1,
     "confirmed": false,
-    "payload_fields": {
-      "fan": status,
-      "light": checkLight()
-    }
+    "payload_raw": base64Handle(status,checkLight())
   }
 }
 
@@ -500,10 +508,7 @@ var dataLight = (status) => {
     "dev_id": deviceId,
     "port": 1,
     "confirmed": false,
-    "payload_fields": {
-      "fan": checkFan(),
-      "light": status
-    }
+    "payload_raw": base64Handle(checkFan(),status)
   }
 }
 
@@ -556,7 +561,7 @@ var sendDownlink = (data) => {
     method: "POST",
     body: JSON.stringify(data)
   }).then(res => {
-    console.log("Request complete! response:", res);
+    console.log("Request complete! response:", res.status);
   });
 }
 
